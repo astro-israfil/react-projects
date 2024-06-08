@@ -12,7 +12,7 @@ const Post = ({post}) => {
             <img className="relative h-full max-h-96 rounded-md" src={databaseService.getFilePreview(post.image)} alt={post.title} />
             {
                 userId && userId === post.userId && (
-                    <EditAndDelete className="w-8 absolute bottom-6 right-2 flex justify-end gap-1" fileId={post.image} postId={post.$id} />
+                    <EditAndDelete className="w-8 absolute bottom-6 right-2 flex justify-end gap-1" fileId={post.image} postId={post.$id} post={post} />
                 )
             }
             </Link>
