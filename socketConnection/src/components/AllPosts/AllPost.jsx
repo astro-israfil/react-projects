@@ -7,7 +7,7 @@ const AllPosts = () => {
     const allPosts = useSelector((state) => state.posts.posts);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
 
     useEffect(() => {
         async function fetchPosts() {
@@ -32,11 +32,11 @@ const AllPosts = () => {
             <Loader />
         </div>
     ) : error ? (
-        <div className="w-full h-screen flex items-center">
+        <div className="w-full h-[80vh] flex items-center">
             <p className="text-red-600 font-semibold text-center">{error}</p>
         </div>
     ) : (
-        <div className="columns-1 sm:columns-2 md:columns-4 lg:columns-6">
+        <div className="columns-1 sm:columns-2 md:columns-4 lg:columns-6 pb-48 pt-12">
             {
                 allPosts.map((post) => (
                     <Post key={post?.$id} post={post} />

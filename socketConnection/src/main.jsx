@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { store } from './store/store';
-import { Protected, AllPosts, Login, Signup } from './components/';
+import { Protected, AllPosts, Login, Signup, PostDetails } from './components/';
 import App from './App.jsx'
 import './index.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
@@ -17,6 +17,14 @@ const router = createBrowserRouter([
         element: (
           <Protected authentication>
             <AllPosts />
+          </Protected>
+        )
+      },
+      {
+        path: 'post/:postId',
+        element: (
+          <Protected authentication>
+            <PostDetails />
           </Protected>
         )
       },

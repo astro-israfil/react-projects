@@ -13,6 +13,9 @@ import Textarea from "./Textarea/Textarea";
 import Protected from "./AuthLayout/AuthLayout";
 import AllPosts from "./AllPosts/AllPost";
 import Post from "./Post/Post";
+import PostDetails from "./PostDetails/PostDetails";
+import PostCard from "./PostCard/PostCard";
+import EditAndDelete from "./EditAndDelete/EditAndDelete";
 
 export {
     Header,
@@ -29,5 +32,8 @@ export {
     Textarea,
     Protected,
     AllPosts,
-    Post
+    Post,
+    PostDetails,
+    PostCard,
+    EditAndDelete,
 };

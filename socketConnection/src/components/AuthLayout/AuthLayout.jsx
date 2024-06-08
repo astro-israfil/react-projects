@@ -12,11 +12,11 @@ function Protected({children, authentication=true}) {
     useEffect(() => {
         if (authentication && authState !== authentication) {
             navigate("/login");
-        } else if (authState) {
+        } else if (!authentication && authState !== authentication) {
             navigate("/");
         }
         setLoading(false);
-    }, [authState, authentication, navigate])
+    }, [authState, authentication, navigate]);
     return (
         <>
             {loading? (

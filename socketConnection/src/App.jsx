@@ -34,7 +34,7 @@ function App() {
   return (
     <>
       <Container>
-        <div className="sticky top-0 left-0 right-0">
+        <div className="sticky top-0 left-0 right-0 z-30">
           <Header />
         </div>
         <div>
@@ -42,7 +42,7 @@ function App() {
         </div>
         {
           authState && (
-            <div className="fixed bottom-0 right-0 left-0 p-8 w-full flex justify-center z-10">
+            <div className="fixed bottom-0 right-0 left-0 w-full flex justify-center z-30">
               <AddPost />
             </div>
           )

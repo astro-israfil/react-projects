@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addPost } from "../../features/postsSlice";
+import { addPost, clearEditPost, updatePosts } from "../../features/postsSlice";
 import databaseService from "../../database/database";
 import { Input, Button, ProfileAvatar, InputCard, Loader } from "../";
 import galleryIcon from "../../assets/galleryIcon.png";
 import { useForm } from "react-hook-form";
 
 const AddPost = () => {
+    const editPost = useSelector(state => state.posts.editPost);
     const dispath = useDispatch();
-    const {register, handleSubmit} = useForm();
+    const {register, handleSubmit, setValue} = useForm();
     const [isImageUpload, setIsImageUpload] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadedImage, setupLoadedImage] = useState(null); 
@@ -17,23 +18,34 @@ const AddPost = () => {
     const userName = useSelector(state => state.auth.userData?.name);
 
     const handleUploadImage = (e) => {
-        setIsUploading(true)
-        databaseService.uploadFile(e.target.files[0])
-            .then((file) => {
+        async function imageUpload() {
+            setIsUploading(true)
+            try {
+                const file = await databaseService.uploadFile(e.target.files[0]);
                 if(file) {
                     setImageId(file.$id);
                     const filePreview = databaseService.getFilePreview(file.$id);
                     setupLoadedImage(filePreview);
                 }
-            }).catch((error) => {
+            } catch (error) {
                 console.log(error);
-            }).finally(() => {
+            } finally {
                 setIsUploading(false);
-            })
+            }
+        }
+
+        if (imageId && uploadedImage) {
+            databaseService.deleteFile(imageId)
+                .then(() => {
+                    imageUpload();
+                })
+        } else {
+            imageUpload();
+        }
     }
 
     const handleCancleUploadImage = () => {
-        if (imageId && uploadedImage) {
+        if (imageId && uploadedImage && !editPost) {
             databaseService.deleteFile(imageId)
             .then(() => {
                 setupLoadedImage(null);
@@ -44,35 +56,76 @@ const AddPost = () => {
             })
         } else {
             setIsImageUpload(false);
+            dispath(clearEditPost());
+            setImageId("");
+            setupLoadedImage(null);
         }
     }
 
     const handleSubmitPost = (data) => {
-        data = {...data, image: imageId, userId};
-        if (userId && imageId) {
-            databaseService.createPost(data)
+        if (!editPost && imageId) {
+            data = {...data, image: imageId, userId};
+            if (userId && imageId) {
+                databaseService.createPost(data)
+                    .then((post) => {
+                        dispath(addPost({post: {...data, ...post}}));
+                        setupLoadedImage(null);
+                        setImageId("");
+                        setIsImageUpload(false);
+                        setValue("title", "");
+                        setValue("content", "");
+                    }).catch((error) => {
+                        console.log(error);
+                    })
+            }
+        } else if (editPost && imageId) {
+            data = {...data, image: imageId, userId };
+            databaseService.updatePost(editPost.$id, data)
                 .then((post) => {
-                    dispath(addPost({post: {...data, ...post}}));
+                    dispath(updatePosts({editedPost: {...data, ...post}}));
+                    dispath(clearEditPost());
                     setupLoadedImage(null);
                     setImageId("");
                     setIsImageUpload(false);
+                    setValue("title", "");
+                    setValue("content", "");
                 }).catch((error) => {
                     console.log(error);
                 })
         }
     }
 
+    useEffect(() => {
+        if (editPost) {
+            setValue("title", editPost?.title || "");
+            setValue("content", editPost?.content || "");
+            setIsImageUpload(true);
+            setupLoadedImage(databaseService.getFilePreview(editPost.image));
+            setImageId(editPost.image);
+        }
+    }, [editPost]);
+
     return (
-        <div className="w-full max-w-3xl px-10 relative dark:bg-black/[.03] backdrop-blur-md rounded-2xl">
+        <div className="w-full max-w-3xl px-10 relative dark:bg-black/[.05] bg-white backdrop-blur-md rounded-2xl">
             <form onSubmit={handleSubmit(handleSubmitPost)} className="flex w-full gap-4 relative">
             <div className="min-w-14 flex items-center">
                 <ProfileAvatar alt={userName} />
             </div>
             <div className="pt-3 flex-1">
-                <Input type="text" placeholder="Share what's on you mind!" {...register("title", {
+                <Input type="text"
+                    con
+                    placeholder="Share what's on you mind!" 
+                    {...register("title", {
                     required: true,
                     minLength: 9,
-                })} />
+                    })} 
+                />
+                {/* <Controller 
+                    as={<inpu type="text" />}
+                    control={control}
+                    defaultValue={editPost? editPost.title : ""}
+                    name="title"
+                /> */}
             </div>
             {
                 <div className="pt-3 flex-1">
@@ -107,7 +160,7 @@ const AddPost = () => {
             }
             
             <div className="flex items-center">
-                <Button type="submit" className="bg-black text-blue-100 dark:bg-blue-600 dark:text-white rounded-full">Post</Button>
+                <Button type="submit" className="bg-black text-blue-100 dark:bg-blue-600 dark:text-white rounded-full">{editPost ? "Update" : "Post"}</Button>
             </div>
             </form>
         </div>
